@@ -1150,6 +1150,7 @@
         let timeLeft = 60; // 60 seconds = 1 minute
         let gameOverTriggered = false; // Prevent multiple game over screens
         let isBonusQuestion = false;
+        let usedQuestions = {}; // Track used question indices per difficulty
 
         // Built-in question bank
         const questionBank = {
@@ -1764,9 +1765,10 @@
             document.querySelector('.difficulty-select').style.display = 'none';
             document.querySelector('h1').style.display = 'none';
             document.querySelector('.subtitle').style.display = 'none';
-            
-            // Reset game over flag
+
+            // Reset game state
             gameOverTriggered = false;
+            usedQuestions = {};
             
             // Start the 1-minute timer
             timeLeft = 60;
@@ -2018,9 +2020,20 @@
             
             // Regular question from current difficulty
             const questions = questionBank[currentDifficulty];
-            
-            // Pick a random question
-            const randomQ = questions[Math.floor(Math.random() * questions.length)];
+
+            // Track used questions per difficulty, reset when exhausted
+            if (!usedQuestions[currentDifficulty]) usedQuestions[currentDifficulty] = [];
+            if (usedQuestions[currentDifficulty].length >= questions.length) {
+                usedQuestions[currentDifficulty] = [];
+            }
+
+            // Pick a random unused question
+            let idx;
+            do {
+                idx = Math.floor(Math.random() * questions.length);
+            } while (usedQuestions[currentDifficulty].includes(idx));
+            usedQuestions[currentDifficulty].push(idx);
+            const randomQ = questions[idx];
             
             const correct = randomQ.correct;
             const choices = [correct, ...randomQ.wrong];
@@ -2043,12 +2056,19 @@
             document.getElementById('feedback').style.display = 'none';
             document.getElementById('nextBtn').style.display = 'none';
             
-            // Reset choice buttons
+            // Reset choice buttons — disable transition to clear highlights instantly
             const choiceBtns = document.querySelectorAll('.choice-btn');
             choiceBtns.forEach(btn => {
+                btn.style.transition = 'none';
                 btn.disabled = true;
                 btn.classList.remove('selected-correct', 'selected-wrong', 'show-correct');
-                btn.style.display = 'none'; // Hide all first
+                btn.style.background = '';
+                btn.style.borderColor = '';
+                btn.style.display = 'none';
+            });
+            // Re-enable transitions after a frame
+            requestAnimationFrame(() => {
+                choiceBtns.forEach(btn => btn.style.transition = '');
             });
             
             document.getElementById('question').innerHTML = '<span class="loading">🌟 Loading next question...</span>';
