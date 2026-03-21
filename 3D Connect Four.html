@@ -398,8 +398,8 @@
                 </div>
                 <div class="difficulty-selector" id="difficultySelector">
                     <div style="margin-bottom: 5px; font-weight: bold;">AI Difficulty:</div>
-                    <button class="difficulty-btn active" id="easyBtn" onclick="setDifficulty(&#39;easy&#39;)">Easy</button>
-                    <button class="difficulty-btn" id="mediumBtn" onclick="setDifficulty(&#39;medium&#39;)">Medium</button>
+                    <button class="difficulty-btn" id="easyBtn" onclick="setDifficulty(&#39;easy&#39;)">Easy</button>
+                    <button class="difficulty-btn active" id="mediumBtn" onclick="setDifficulty(&#39;medium&#39;)">Medium</button>
                     <button class="difficulty-btn" id="hardBtn" onclick="setDifficulty(&#39;hard&#39;)">Hard</button>
                 </div>
                 <button class="reset-btn" onclick="resetGame()">New Game</button>
@@ -451,7 +451,7 @@
         let winningCells = [];
         let pieces = []; // Store piece meshes for animation
         let gameMode = 'vsAI'; // 'twoPlayer' or 'vsAI'
-        let aiDifficulty = 'easy'; // 'easy', 'medium', 'hard'
+        let aiDifficulty = 'medium'; // 'easy', 'medium', 'hard'
         let isAIThinking = false;
         let impossibleMode = false; // Secret impossible AI mode
         let isPaused = false; // Prevent double moves
@@ -1673,5 +1673,8 @@
         animate();
     </script>
 
+    <div style="position: fixed; bottom: 8px; left: 0; right: 0; text-align: center; font-size: 0.75em; color: rgba(255,255,255,0.3); pointer-events: none; z-index: 1000;">
+        © 2026 Dad &amp; Dudes Games
+    </div>
 
 </body></html>
