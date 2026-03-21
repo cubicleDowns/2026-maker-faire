@@ -1,0 +1,2362 @@
+<!DOCTYPE html>
+<!-- saved from url=(0056)file:///C:/Users/Alex/Downloads/space_trivia_game_2.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Space Trivia Challenge - AI Edition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #2d1b4e 100%);
+            min-height: 100vh;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            color: white;
+            overflow-x: hidden;
+            overflow-y: auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 700px;
+            width: 95%;
+            max-height: 95vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            z-index: 1;
+            margin: 0 auto;
+        }
+
+        .container.game-active {
+            overflow: hidden;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 5px;
+            flex-shrink: 0;
+            background: linear-gradient(45deg, #4facfe, #00f2fe, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #a0aec0;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            flex-shrink: 0;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 10px;
+            padding: 10px;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-label {
+            color: #a0aec0;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #4facfe;
+        }
+
+        .difficulty-select {
+            margin-bottom: 30px;
+        }
+
+        .difficulty-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .difficulty-btn {
+            padding: 12px 24px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            min-height: 44px;
+        }
+
+        .difficulty-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .difficulty-btn:active {
+            transform: scale(0.97);
+        }
+
+        .difficulty-btn.active {
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            border-color: #4facfe;
+        }
+
+        .question-section {
+            margin-bottom: 10px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .question-box {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            line-height: 1.4;
+            text-align: center;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .answer-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .choice-btn {
+            width: 100%;
+            padding: 10px 14px;
+            font-size: 1em;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+            min-height: 40px;
+        }
+
+        .choice-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+            border-color: #4facfe;
+        }
+        
+        .choice-btn:active:not(:disabled) {
+            background: rgba(79, 172, 254, 0.3);
+            transform: scale(0.98);
+        }
+
+        .choice-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .choice-btn.selected-correct {
+            background: rgba(72, 187, 120, 0.3);
+            border-color: #48bb78;
+        }
+
+        .choice-btn.selected-wrong {
+            background: rgba(245, 101, 101, 0.3);
+            border-color: #f56565;
+        }
+
+        .choice-btn.show-correct {
+            background: rgba(72, 187, 120, 0.2);
+            border-color: #48bb78;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            min-height: 50px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(79, 172, 254, 0.4);
+        }
+        
+        .btn-primary:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #gameScreen {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+        }
+
+        #choicesContainer {
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.1em;
+            display: none;
+        }
+
+        .feedback.correct {
+            background: rgba(72, 187, 120, 0.2);
+            border: 2px solid #48bb78;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background: rgba(245, 101, 101, 0.2);
+            border: 2px solid #f56565;
+            display: block;
+        }
+
+        .fun-fact {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(167, 139, 250, 0.2);
+            border-left: 4px solid #a78bfa;
+            border-radius: 5px;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .loading {
+            text-align: center;
+            color: #a0aec0;
+            font-style: italic;
+        }
+
+        .start-screen {
+            text-align: center;
+        }
+
+        .start-btn {
+            background: linear-gradient(45deg, #a78bfa, #c084fc);
+            margin-top: 20px;
+        }
+
+        .start-btn:hover {
+            box-shadow: 0 5px 20px rgba(167, 139, 250, 0.4);
+        }
+
+        /* ===== RESPONSIVE DESIGN ===== */
+        
+        /* Large screens (desktops, 1200px and up) */
+        @media (min-width: 1200px) {
+            .container {
+                max-width: 900px;
+            }
+            
+            .leaderboard {
+                width: 280px;
+            }
+        }
+        
+        /* Tablets (landscape, 900px to 1199px) */
+        @media (max-width: 1199px) and (min-width: 900px) {
+            .container {
+                max-width: 700px;
+            }
+            
+            .leaderboard {
+                width: 240px;
+            }
+        }
+        
+        /* Tablets (portrait) and small laptops (600px to 899px) */
+        /* This includes most iPads */
+        @media (max-width: 899px) and (min-width: 600px) {
+            html {
+                font-size: 16px;
+            }
+            
+            body {
+                padding: 15px;
+            }
+            
+            .container {
+                max-width: 90%;
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 2.5em;
+            }
+            
+            .subtitle {
+                font-size: 1em;
+            }
+            
+            .leaderboard {
+                position: relative;
+                right: auto;
+                top: auto;
+                width: 100%;
+                max-width: 500px;
+                margin: 30px auto;
+            }
+            
+            .difficulty-btn {
+                padding: 14px 20px;
+                font-size: 1.1em;
+                min-height: 50px;
+            }
+            
+            .choice-btn {
+                padding: 16px;
+                font-size: 1.1em;
+                min-height: 60px;
+            }
+            
+            .score-board {
+                padding: 15px;
+                gap: 12px;
+            }
+            
+            body {
+                flex-direction: column;
+            }
+        }
+        
+        /* iPad Landscape Mode (wider screens in landscape) */
+        @media (min-width: 900px) and (max-width: 1199px) and (orientation: landscape) {
+            body {
+                padding: 5px;
+                height: 100vh;
+                overflow: hidden;
+            }
+            
+            .container {
+                max-width: 85%;
+                padding: 15px;
+                max-height: 95vh;
+                overflow-y: auto;
+            }
+            
+            h1 {
+                font-size: 2em;
+                margin-bottom: 5px;
+            }
+            
+            .subtitle {
+                font-size: 0.9em;
+                margin-bottom: 10px;
+            }
+            
+            .score-board {
+                padding: 10px;
+                margin-bottom: 10px;
+            }
+            
+            .score-label {
+                font-size: 0.75em;
+            }
+            
+            .score-value {
+                font-size: 1.3em;
+            }
+            
+            .difficulty-buttons {
+                gap: 8px;
+                margin-bottom: 10px;
+            }
+            
+            .difficulty-btn {
+                padding: 8px 16px;
+                font-size: 0.9em;
+            }
+            
+            .instruction-box {
+                padding: 12px;
+                margin: 10px 0;
+                font-size: 0.85em;
+            }
+            
+            .start-btn {
+                margin-top: 10px;
+                padding: 10px;
+                font-size: 1em;
+            }
+            
+            .leaderboard {
+                position: fixed;
+                right: 10px;
+                top: 20px;
+                width: 220px;
+                margin: 0;
+                padding: 12px;
+            }
+            
+            .leaderboard h3 {
+                font-size: 1.1em;
+                margin-bottom: 8px;
+            }
+            
+            .leaderboard-item {
+                padding: 6px;
+                font-size: 0.8em;
+            }
+            
+            body {
+                flex-direction: row;
+            }
+        }
+        
+        /* Tablet landscape - smaller (like iPad in landscape) */
+        @media (min-width: 600px) and (max-width: 899px) and (orientation: landscape) {
+            body {
+                padding: 5px;
+                height: 100vh;
+                overflow: hidden;
+            }
+            
+            .container {
+                max-width: 70%;
+                padding: 12px;
+                max-height: 95vh;
+                overflow-y: auto;
+            }
+            
+            h1 {
+                font-size: 1.7em;
+                margin-bottom: 4px;
+            }
+            
+            .subtitle {
+                font-size: 0.8em;
+                margin-bottom: 8px;
+            }
+            
+            .score-board {
+                padding: 8px;
+                margin-bottom: 8px;
+                gap: 8px;
+            }
+            
+            .score-item {
+                padding: 6px;
+            }
+            
+            .score-label {
+                font-size: 0.7em;
+                margin-bottom: 2px;
+            }
+            
+            .score-value {
+                font-size: 1.2em;
+            }
+            
+            .difficulty-buttons {
+                gap: 6px;
+                margin-bottom: 8px;
+            }
+            
+            .difficulty-btn {
+                padding: 7px 12px;
+                font-size: 0.85em;
+            }
+            
+            .instruction-box {
+                padding: 10px;
+                margin: 8px 0;
+                font-size: 0.8em;
+                line-height: 1.3;
+            }
+            
+            .start-btn {
+                margin-top: 8px;
+                padding: 9px;
+                font-size: 0.95em;
+            }
+            
+            .leaderboard {
+                position: fixed;
+                right: 10px;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 200px;
+                margin: 0;
+                padding: 10px;
+            }
+            
+            .leaderboard h3 {
+                font-size: 1em;
+                margin-bottom: 6px;
+            }
+            
+            .leaderboard-item {
+                padding: 5px;
+                font-size: 0.75em;
+                margin-bottom: 4px;
+            }
+            
+            body {
+                flex-direction: row;
+                align-items: center;
+            }
+        }
+        
+        /* iPad Portrait Mode */
+        @media (min-width: 600px) and (max-width: 899px) and (orientation: portrait) {
+            body {
+                padding: 10px;
+                align-items: flex-start;
+                padding-top: 10px;
+            }
+
+            .container {
+                max-width: 95%;
+                padding: 15px;
+                max-height: calc(100vh - 20px);
+                overflow-y: auto;
+            }
+
+            .container.game-active {
+                overflow-y: auto;
+            }
+            
+            h1 {
+                font-size: 1.9em;
+                margin-bottom: 6px;
+            }
+            
+            .subtitle {
+                font-size: 0.9em;
+                margin-bottom: 15px;
+            }
+            
+            .score-board {
+                margin-bottom: 15px;
+                padding: 12px;
+            }
+            
+            .difficulty-buttons {
+                gap: 6px;
+                margin-bottom: 15px;
+            }
+            
+            .difficulty-btn {
+                padding: 9px 14px;
+                font-size: 0.9em;
+            }
+            
+            .start-btn {
+                margin-top: 12px;
+                padding: 12px;
+                font-size: 1em;
+            }
+
+            #gameScreen .question-section {
+                margin-bottom: 5px;
+            }
+
+            #gameScreen .question-box {
+                padding: 10px;
+                margin-bottom: 8px;
+            }
+
+            .feedback {
+                padding: 12px;
+                margin-top: 6px;
+            }
+
+            #nextBtn {
+                margin-top: 6px !important;
+                padding: 12px;
+            }
+
+            /* Hide fixed leaderboard, show it below game instead */
+            .leaderboard {
+                position: relative;
+                right: auto;
+                top: auto;
+                width: 100%;
+                max-width: 450px;
+                margin: 20px auto 0;
+                display: block;
+            }
+            
+            .instruction-box {
+                padding: 15px;
+                margin: 15px 0;
+                font-size: 0.9em;
+            }
+        }
+        
+        /* iPad Mini specific (smaller iPad in portrait) */
+        @media (min-width: 600px) and (max-width: 820px) and (orientation: portrait) {
+            .container {
+                padding: 12px;
+                max-height: calc(100vh - 20px);
+                overflow-y: auto;
+            }
+
+            .container.game-active {
+                overflow-y: auto;
+            }
+            
+            h1 {
+                font-size: 1.7em;
+                margin-bottom: 5px;
+            }
+            
+            .subtitle {
+                font-size: 0.85em;
+                margin-bottom: 12px;
+            }
+            
+            .score-board {
+                margin-bottom: 12px;
+                padding: 10px;
+            }
+            
+            .score-item {
+                padding: 6px;
+            }
+            
+            .score-label {
+                font-size: 0.7em;
+            }
+            
+            .score-value {
+                font-size: 1.3em;
+            }
+            
+            .difficulty-buttons {
+                gap: 5px;
+                margin-bottom: 12px;
+            }
+            
+            .difficulty-btn {
+                padding: 8px 12px;
+                font-size: 0.85em;
+            }
+            
+            .start-btn {
+                margin-top: 10px;
+                padding: 11px;
+                font-size: 0.95em;
+            }
+            
+            .instruction-box {
+                padding: 12px;
+                margin: 12px 0;
+                font-size: 0.85em;
+            }
+        }
+        
+        /* Mobile phones (under 600px) */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+                max-width: 100%;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .subtitle {
+                font-size: 0.9em;
+            }
+            
+            .difficulty-buttons {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .difficulty-btn {
+                width: 100%;
+                padding: 12px;
+                font-size: 0.95em;
+            }
+            
+            .score-board {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+                padding: 12px;
+            }
+            
+            .score-item {
+                padding: 8px;
+            }
+            
+            .score-label {
+                font-size: 0.75em;
+            }
+            
+            .score-value {
+                font-size: 1.2em;
+            }
+            
+            .choice-btn {
+                padding: 12px;
+                font-size: 0.95em;
+            }
+            
+            .btn {
+                padding: 12px;
+                font-size: 1em;
+            }
+            
+            .leaderboard {
+                position: relative;
+                right: auto;
+                top: auto;
+                width: 100%;
+                margin: 15px 0;
+            }
+            
+            .leaderboard h3 {
+                font-size: 1.2em;
+            }
+            
+            .leaderboard-item {
+                font-size: 0.85em;
+                padding: 8px;
+            }
+            
+            .game-over-box {
+                padding: 25px;
+                max-width: 95%;
+            }
+            
+            .game-over-box > div {
+                font-size: 0.9em !important;
+            }
+            
+            .game-over-box > div:first-child {
+                font-size: 2em !important;
+            }
+            
+            body {
+                flex-direction: column;
+                padding: 10px;
+            }
+        }
+        
+        /* Very small phones (under 400px) */
+        @media (max-width: 400px) {
+            h1 {
+                font-size: 1.5em;
+            }
+            
+            .score-board {
+                grid-template-columns: 1fr;
+            }
+            
+            .difficulty-btn {
+                font-size: 0.85em;
+                padding: 10px;
+            }
+            
+            .choice-btn {
+                font-size: 0.85em;
+                padding: 10px;
+            }
+            
+            .game-over-box {
+                padding: 20px;
+            }
+        }
+
+        /* Rocket animation */
+        .rocket {
+            position: fixed;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 4em;
+            z-index: 1000;
+            animation: rocketLaunch 3s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes rocketLaunch {
+            0% {
+                bottom: -100px;
+                opacity: 1;
+            }
+            100% {
+                bottom: 120vh;
+                opacity: 0;
+            }
+        }
+
+        /* Fireworks animation */
+        .firework {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        @keyframes fireworkExplode {
+            0% {
+                transform: translate(0, 0);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty));
+                opacity: 0;
+            }
+        }
+
+        .firework-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .leaderboard {
+            position: fixed;
+            right: 20px;
+            top: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            width: 250px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 10;
+        }
+
+        .leaderboard h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #ffd700;
+            font-size: 1.3em;
+        }
+
+        .leaderboard-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            flex-direction: column;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            font-size: 0.95em;
+        }
+
+        .leaderboard-item:nth-child(1) {
+            background: rgba(255, 215, 0, 0.2);
+            border: 1px solid #ffd700;
+        }
+
+        .leaderboard-item:nth-child(2) {
+            background: rgba(192, 192, 192, 0.2);
+            border: 1px solid #c0c0c0;
+        }
+
+        .leaderboard-item:nth-child(3) {
+            background: rgba(205, 127, 50, 0.2);
+            border: 1px solid #cd7f32;
+        }
+
+        .leaderboard-rank {
+            font-weight: bold;
+            color: #4facfe;
+            margin-bottom: 4px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .leaderboard-score {
+            font-weight: bold;
+            color: #a78bfa;
+            font-size: 1.2em;
+        }
+
+        .reset-btn {
+            width: 100%;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(245, 101, 101, 0.3);
+            border: 1px solid #f56565;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .reset-btn:hover {
+            background: rgba(245, 101, 101, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .reset-btn:active {
+            transform: translateY(0);
+        }
+        
+        .game-over-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .game-over-box {
+            background: linear-gradient(135deg, #1a1f3a 0%, #2d1b4e 100%);
+            border: 3px solid #ff0000;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: 0 0 50px rgba(255, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"><div class="star" style="width: 2.2109px; height: 2.2109px; left: 59.2278%; top: 99.2717%; animation-delay: 0.687224s;"></div><div class="star" style="width: 0.5948px; height: 0.5948px; left: 44.5971%; top: 31.5214%; animation-delay: 0.0557322s;"></div><div class="star" style="width: 2.05289px; height: 2.05289px; left: 10.268%; top: 75.4102%; animation-delay: 2.97857s;"></div><div class="star" style="width: 1.57409px; height: 1.57409px; left: 25.6378%; top: 11.0819%; animation-delay: 2.32969s;"></div><div class="star" style="width: 0.0962874px; height: 0.0962874px; left: 7.6537%; top: 26.1945%; animation-delay: 1.21042s;"></div><div class="star" style="width: 0.596309px; height: 0.596309px; left: 4.02253%; top: 28.9047%; animation-delay: 2.65572s;"></div><div class="star" style="width: 0.118667px; height: 0.118667px; left: 62.5091%; top: 57.418%; animation-delay: 1.32866s;"></div><div class="star" style="width: 2.65317px; height: 2.65317px; left: 33.0042%; top: 90.2653%; animation-delay: 0.572669s;"></div><div class="star" style="width: 0.701172px; height: 0.701172px; left: 95.7399%; top: 4.25974%; animation-delay: 1.72874s;"></div><div class="star" style="width: 0.515417px; height: 0.515417px; left: 72.8546%; top: 84.4254%; animation-delay: 1.27854s;"></div><div class="star" style="width: 1.10965px; height: 1.10965px; left: 63.102%; top: 48.5712%; animation-delay: 0.0997452s;"></div><div class="star" style="width: 2.14465px; height: 2.14465px; left: 56.589%; top: 0.206717%; animation-delay: 1.98234s;"></div><div class="star" style="width: 0.259712px; height: 0.259712px; left: 55.6034%; top: 68.3635%; animation-delay: 1.33687s;"></div><div class="star" style="width: 0.670098px; height: 0.670098px; left: 93.0605%; top: 35.5207%; animation-delay: 0.782304s;"></div><div class="star" style="width: 1.63179px; height: 1.63179px; left: 98.1669%; top: 3.01009%; animation-delay: 1.97407s;"></div><div class="star" style="width: 1.15293px; height: 1.15293px; left: 18.6626%; top: 53.0555%; animation-delay: 0.0946892s;"></div><div class="star" style="width: 1.77509px; height: 1.77509px; left: 48.846%; top: 24.9569%; animation-delay: 2.94699s;"></div><div class="star" style="width: 2.14523px; height: 2.14523px; left: 74.9537%; top: 23.2611%; animation-delay: 1.59856s;"></div><div class="star" style="width: 0.435133px; height: 0.435133px; left: 16.3502%; top: 41.154%; animation-delay: 1.97191s;"></div><div class="star" style="width: 0.288316px; height: 0.288316px; left: 46.8407%; top: 66.7297%; animation-delay: 2.88926s;"></div><div class="star" style="width: 2.9029px; height: 2.9029px; left: 56.3891%; top: 13.087%; animation-delay: 1.2915s;"></div><div class="star" style="width: 2.5585px; height: 2.5585px; left: 63.1038%; top: 63.495%; animation-delay: 1.03444s;"></div><div class="star" style="width: 0.908405px; height: 0.908405px; left: 67.8706%; top: 9.16268%; animation-delay: 1.38161s;"></div><div class="star" style="width: 2.25023px; height: 2.25023px; left: 51.4237%; top: 49.0001%; animation-delay: 1.75026s;"></div><div class="star" style="width: 1.55925px; height: 1.55925px; left: 2.1787%; top: 63.7122%; animation-delay: 0.567202s;"></div><div class="star" style="width: 0.780921px; height: 0.780921px; left: 77.3004%; top: 14.7912%; animation-delay: 1.02031s;"></div><div class="star" style="width: 1.77835px; height: 1.77835px; left: 91.1874%; top: 28.3341%; animation-delay: 2.07366s;"></div><div class="star" style="width: 2.55408px; height: 2.55408px; left: 12.5033%; top: 90.1217%; animation-delay: 1.15903s;"></div><div class="star" style="width: 0.0258938px; height: 0.0258938px; left: 5.1325%; top: 20.0179%; animation-delay: 0.108527s;"></div><div class="star" style="width: 1.39231px; height: 1.39231px; left: 58.2317%; top: 74.0833%; animation-delay: 2.09082s;"></div><div class="star" style="width: 2.15821px; height: 2.15821px; left: 12.3266%; top: 13.1722%; animation-delay: 1.75042s;"></div><div class="star" style="width: 2.38945px; height: 2.38945px; left: 80.3849%; top: 44.4666%; animation-delay: 1.5066s;"></div><div class="star" style="width: 1.31645px; height: 1.31645px; left: 73.5793%; top: 25.0958%; animation-delay: 1.26798s;"></div><div class="star" style="width: 2.51331px; height: 2.51331px; left: 43.1791%; top: 92.973%; animation-delay: 2.15687s;"></div><div class="star" style="width: 0.717076px; height: 0.717076px; left: 76.5351%; top: 7.76283%; animation-delay: 2.38589s;"></div><div class="star" style="width: 2.52915px; height: 2.52915px; left: 44.4236%; top: 67.8594%; animation-delay: 0.930126s;"></div><div class="star" style="width: 0.0186801px; height: 0.0186801px; left: 59.2642%; top: 9.11751%; animation-delay: 1.78498s;"></div><div class="star" style="width: 0.687088px; height: 0.687088px; left: 94.3873%; top: 1.63426%; animation-delay: 1.4034s;"></div><div class="star" style="width: 2.23578px; height: 2.23578px; left: 91.8975%; top: 41.0094%; animation-delay: 0.237385s;"></div><div class="star" style="width: 1.39598px; height: 1.39598px; left: 71.7728%; top: 60.4815%; animation-delay: 1.59842s;"></div><div class="star" style="width: 0.546236px; height: 0.546236px; left: 68.1955%; top: 89.2324%; animation-delay: 0.840841s;"></div><div class="star" style="width: 1.74833px; height: 1.74833px; left: 58.3713%; top: 5.10935%; animation-delay: 1.79895s;"></div><div class="star" style="width: 2.6063px; height: 2.6063px; left: 99.527%; top: 65.9352%; animation-delay: 0.129248s;"></div><div class="star" style="width: 2.08068px; height: 2.08068px; left: 21.5002%; top: 12.4009%; animation-delay: 0.227053s;"></div><div class="star" style="width: 1.68453px; height: 1.68453px; left: 97.118%; top: 16.304%; animation-delay: 2.74787s;"></div><div class="star" style="width: 1.21365px; height: 1.21365px; left: 77.0782%; top: 23.4%; animation-delay: 0.862875s;"></div><div class="star" style="width: 2.11173px; height: 2.11173px; left: 9.01015%; top: 50.657%; animation-delay: 2.05357s;"></div><div class="star" style="width: 1.00289px; height: 1.00289px; left: 81.0026%; top: 14.5364%; animation-delay: 2.15418s;"></div><div class="star" style="width: 0.453693px; height: 0.453693px; left: 79.9856%; top: 99.8051%; animation-delay: 2.83362s;"></div><div class="star" style="width: 2.65826px; height: 2.65826px; left: 29.2264%; top: 13.1989%; animation-delay: 0.630115s;"></div><div class="star" style="width: 0.0398379px; height: 0.0398379px; left: 59.3779%; top: 82.5257%; animation-delay: 2.31677s;"></div><div class="star" style="width: 0.351258px; height: 0.351258px; left: 57.9548%; top: 23.874%; animation-delay: 1.42559s;"></div><div class="star" style="width: 0.490501px; height: 0.490501px; left: 69.3989%; top: 84.1474%; animation-delay: 1.45555s;"></div><div class="star" style="width: 1.28984px; height: 1.28984px; left: 31.9141%; top: 43.0604%; animation-delay: 0.436862s;"></div><div class="star" style="width: 0.568422px; height: 0.568422px; left: 30.0983%; top: 51.8278%; animation-delay: 0.108506s;"></div><div class="star" style="width: 1.22551px; height: 1.22551px; left: 70.8296%; top: 46.0538%; animation-delay: 0.396961s;"></div><div class="star" style="width: 1.78849px; height: 1.78849px; left: 69.7559%; top: 65.6009%; animation-delay: 1.76671s;"></div><div class="star" style="width: 0.878698px; height: 0.878698px; left: 48.6309%; top: 41.6491%; animation-delay: 1.16484s;"></div><div class="star" style="width: 1.24653px; height: 1.24653px; left: 15.6398%; top: 39.943%; animation-delay: 2.0164s;"></div><div class="star" style="width: 2.70853px; height: 2.70853px; left: 18.4204%; top: 23.0443%; animation-delay: 2.9145s;"></div><div class="star" style="width: 0.490446px; height: 0.490446px; left: 89.3044%; top: 14.5517%; animation-delay: 2.75299s;"></div><div class="star" style="width: 1.69435px; height: 1.69435px; left: 97.37%; top: 87.0123%; animation-delay: 0.16386s;"></div><div class="star" style="width: 1.97605px; height: 1.97605px; left: 99.1986%; top: 29.969%; animation-delay: 2.44632s;"></div><div class="star" style="width: 1.86167px; height: 1.86167px; left: 94.6336%; top: 85.5475%; animation-delay: 2.86694s;"></div><div class="star" style="width: 1.27175px; height: 1.27175px; left: 78.3219%; top: 59.2798%; animation-delay: 0.552869s;"></div><div class="star" style="width: 1.32002px; height: 1.32002px; left: 55.4677%; top: 51.086%; animation-delay: 1.1405s;"></div><div class="star" style="width: 1.97057px; height: 1.97057px; left: 75.8966%; top: 86.8362%; animation-delay: 1.85933s;"></div><div class="star" style="width: 0.322361px; height: 0.322361px; left: 23.3551%; top: 84.3467%; animation-delay: 1.89459s;"></div><div class="star" style="width: 0.999284px; height: 0.999284px; left: 2.6724%; top: 32.8762%; animation-delay: 2.34232s;"></div><div class="star" style="width: 1.505px; height: 1.505px; left: 3.58686%; top: 10.0853%; animation-delay: 2.62712s;"></div><div class="star" style="width: 0.966835px; height: 0.966835px; left: 46.6937%; top: 2.09946%; animation-delay: 2.18405s;"></div><div class="star" style="width: 1.36847px; height: 1.36847px; left: 60.6976%; top: 2.64814%; animation-delay: 0.0565837s;"></div><div class="star" style="width: 0.403087px; height: 0.403087px; left: 83.5621%; top: 64.3493%; animation-delay: 1.66723s;"></div><div class="star" style="width: 0.634166px; height: 0.634166px; left: 78.1283%; top: 19.7597%; animation-delay: 0.85072s;"></div><div class="star" style="width: 2.73906px; height: 2.73906px; left: 48.3462%; top: 31.2578%; animation-delay: 1.93527s;"></div><div class="star" style="width: 2.37199px; height: 2.37199px; left: 46.3407%; top: 19.0184%; animation-delay: 0.691085s;"></div><div class="star" style="width: 0.0799813px; height: 0.0799813px; left: 54.4318%; top: 13.3206%; animation-delay: 2.75194s;"></div><div class="star" style="width: 2.47945px; height: 2.47945px; left: 19.3794%; top: 94.7772%; animation-delay: 2.75451s;"></div><div class="star" style="width: 2.01294px; height: 2.01294px; left: 29.2023%; top: 76.3094%; animation-delay: 2.91461s;"></div><div class="star" style="width: 1.77313px; height: 1.77313px; left: 45.516%; top: 34.023%; animation-delay: 0.36062s;"></div><div class="star" style="width: 0.752609px; height: 0.752609px; left: 43.5938%; top: 24.6535%; animation-delay: 1.55104s;"></div><div class="star" style="width: 1.23698px; height: 1.23698px; left: 7.73039%; top: 44.7398%; animation-delay: 2.61867s;"></div><div class="star" style="width: 0.315565px; height: 0.315565px; left: 8.55778%; top: 77.7795%; animation-delay: 2.63163s;"></div><div class="star" style="width: 1.63004px; height: 1.63004px; left: 96.6439%; top: 49.9702%; animation-delay: 2.75235s;"></div><div class="star" style="width: 2.5548px; height: 2.5548px; left: 84.1218%; top: 19.0211%; animation-delay: 2.57797s;"></div><div class="star" style="width: 2.96843px; height: 2.96843px; left: 54.3321%; top: 48.6322%; animation-delay: 0.375732s;"></div><div class="star" style="width: 1.09909px; height: 1.09909px; left: 92.5955%; top: 91.6129%; animation-delay: 1.54862s;"></div><div class="star" style="width: 1.8972px; height: 1.8972px; left: 21.95%; top: 86.5454%; animation-delay: 1.50535s;"></div><div class="star" style="width: 1.31204px; height: 1.31204px; left: 36.1431%; top: 75.952%; animation-delay: 0.310669s;"></div><div class="star" style="width: 0.476388px; height: 0.476388px; left: 53.4442%; top: 97.0825%; animation-delay: 1.77312s;"></div><div class="star" style="width: 0.752263px; height: 0.752263px; left: 87.5384%; top: 41.341%; animation-delay: 1.55753s;"></div><div class="star" style="width: 2.47063px; height: 2.47063px; left: 74.2119%; top: 64.6187%; animation-delay: 2.37201s;"></div><div class="star" style="width: 0.909809px; height: 0.909809px; left: 92.3414%; top: 48.0135%; animation-delay: 0.910107s;"></div><div class="star" style="width: 0.0769651px; height: 0.0769651px; left: 73.2733%; top: 40.4102%; animation-delay: 0.59237s;"></div><div class="star" style="width: 2.15067px; height: 2.15067px; left: 63.5536%; top: 31.8988%; animation-delay: 1.20227s;"></div><div class="star" style="width: 2.88769px; height: 2.88769px; left: 37.1217%; top: 56.7642%; animation-delay: 1.25231s;"></div><div class="star" style="width: 1.86682px; height: 1.86682px; left: 60.0358%; top: 54.8682%; animation-delay: 0.420954s;"></div><div class="star" style="width: 2.61511px; height: 2.61511px; left: 61.5579%; top: 83.2521%; animation-delay: 0.93848s;"></div><div class="star" style="width: 0.464345px; height: 0.464345px; left: 94.5091%; top: 31.3411%; animation-delay: 1.96401s;"></div><div class="star" style="width: 1.08303px; height: 1.08303px; left: 78.214%; top: 58.7242%; animation-delay: 0.273363s;"></div></div>
+    <div class="firework-container" id="fireworkContainer"></div>
+    
+    <!-- Leaderboard -->
+    <div class="leaderboard">
+        <h3>🏆 Earth Defenders</h3>
+        <ol class="leaderboard-list" id="leaderboardList"><li class="leaderboard-item" title="Click 5 times to reset" style="cursor: pointer; user-select: none;">
+                    <span class="leaderboard-rank">#1 Claude</span>
+                    <span class="leaderboard-score">50</span>
+                </li></ol>
+    </div>
+    
+    <div class="container">
+        <h1>🚀 Space Trivia Challenge 👽</h1>
+        <p class="subtitle">DEFEND EARTH FROM THE ALIEN INVASION!</p>
+        
+        <div class="score-board">
+            <div class="score-item">
+                <div class="score-label">Score</div>
+                <div class="score-value" id="score">0</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">High Score</div>
+                <div class="score-value" id="highScore" style="color: #ffd700;">50</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">Time Left</div>
+                <div class="score-value" id="timer" style="color: #ff6b6b;">1:00</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">Questions</div>
+                <div class="score-value" id="questionCount">0</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">Streak</div>
+                <div class="score-value" id="streak">0</div>
+            </div>
+        </div>
+
+        <div class="difficulty-select">
+            <div class="difficulty-buttons">
+                <button class="difficulty-btn" data-difficulty="easy">Easy</button>
+                <button class="difficulty-btn active" data-difficulty="medium">Medium</button>
+                <button class="difficulty-btn" data-difficulty="hard">Hard</button>
+                <button class="difficulty-btn" data-difficulty="extrahard">Extra Hard</button>
+                <button class="difficulty-btn" data-difficulty="superhard">Super Hard</button>
+            </div>
+        </div>
+
+        <div id="startScreen" class="start-screen">
+            <div style="background: rgba(255, 0, 0, 0.1); border: 2px solid #ff6b6b; border-radius: 15px; padding: 25px; margin-bottom: 25px;">
+                <div style="font-size: 2em; margin-bottom: 15px;">👽 ALIEN INVASION! 👽</div>
+                <div style="font-size: 1.2em; line-height: 1.6; color: #e0e0e0;">
+                    <strong>URGENT MESSAGE FROM EARTH DEFENSE:</strong><br>
+                    Hostile aliens have arrived and are threatening humanity! 
+                    They will only spare us if we can prove our knowledge of the universe. 
+                    You have <strong>1 MINUTE</strong> to answer as many space questions as possible. 
+                    Get a question wrong on Easy difficulty and the aliens WIN! 
+                    <br><br>
+                    <span style="color: #4facfe; font-weight: bold;">The fate of Earth is in your hands, Space Defender!</span>
+                </div>
+            </div>
+            <p style="font-size: 1.2em; margin-bottom: 20px;">Choose your difficulty and START THE MISSION!</p>
+            <button class="btn start-btn" onclick="startGame()">🚀 DEFEND EARTH!</button>
+        </div>
+
+        <div id="gameScreen" style="display: none;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <button class="btn" onclick="goHome()" style="background: rgba(255, 255, 255, 0.2); padding: 10px 20px; font-size: 0.9em;">
+                    🏠 Home
+                </button>
+            </div>
+            
+            <div class="question-section">
+                <div class="question-box">
+                    <p class="question-text" id="question">Loading question...</p>
+                </div>
+                <div id="choicesContainer" style="display: flex; flex-direction: column; gap: 6px;">
+                    <button class="choice-btn" onclick="selectAnswer(0)"></button>
+                    <button class="choice-btn" onclick="selectAnswer(1)"></button>
+                    <button class="choice-btn" onclick="selectAnswer(2)"></button>
+                    <button class="choice-btn" onclick="selectAnswer(3)" style="display: none;"></button>
+                    <button class="choice-btn" onclick="selectAnswer(4)" style="display: none;"></button>
+                    <button class="choice-btn" onclick="selectAnswer(5)" style="display: none;"></button>
+                    <button class="choice-btn" onclick="selectAnswer(6)" style="display: none;"></button>
+                    <button class="choice-btn" onclick="selectAnswer(7)" style="display: none;"></button>
+                    <button class="choice-btn" onclick="selectAnswer(8)" style="display: none;"></button>
+                    <button class="choice-btn" onclick="selectAnswer(9)" style="display: none;"></button>
+                </div>
+            </div>
+
+            <div class="feedback" id="feedback"></div>
+
+            <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" style="display: none; margin-top: 10px; flex-shrink: 0;">
+                Next Question →
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let score = 0;
+        let questionCount = 0;
+        let streak = 0;
+        let currentDifficulty = 'medium';
+        let currentQuestion = null;
+        let currentAnswer = null;
+        let currentChoices = [];
+        let correctChoiceIndex = -1;
+        let highScore = 50;
+        let topScores = [
+            { name: "Claude", score: 50 }
+        ];
+        let timerInterval = null;
+        let timeLeft = 60; // 60 seconds = 1 minute
+        let gameOverTriggered = false; // Prevent multiple game over screens
+        let isBonusQuestion = false;
+
+        // Built-in question bank
+        const questionBank = {
+            easy: [
+                {
+                    question: "What is the largest planet in our entire solar system?",
+                    correct: "Jupiter",
+                    wrong: ["Saturn", "Earth"]
+                },
+                {
+                    question: "What planet is famously known as the Red Planet?",
+                    correct: "Mars",
+                    wrong: ["Venus", "Mercury"]
+                },
+                {
+                    question: "What is the name of the closest star to planet Earth?",
+                    correct: "The Sun",
+                    wrong: ["Proxima Centauri", "Sirius"]
+                },
+                {
+                    question: "How many planets are there in our solar system?",
+                    correct: "8",
+                    wrong: ["9", "7"]
+                },
+                {
+                    question: "What is the name of Earth's natural satellite that orbits around us?",
+                    correct: "The Moon",
+                    wrong: ["Titan", "Europa"]
+                },
+                {
+                    question: "Which planet in our solar system has beautiful rings around it?",
+                    correct: "Saturn",
+                    wrong: ["Jupiter", "Uranus"]
+                },
+                {
+                    question: "What is the smallest planet in our entire solar system?",
+                    correct: "Mercury",
+                    wrong: ["Mars", "Pluto"]
+                },
+                {
+                    question: "Which planet orbits closest to the Sun in our solar system?",
+                    correct: "Mercury",
+                    wrong: ["Venus", "Earth"]
+                },
+                {
+                    question: "What do we call a person who travels into outer space?",
+                    correct: "Astronaut",
+                    wrong: ["Pilot", "Explorer"]
+                },
+                {
+                    question: "What phenomenon causes day and night to happen on Earth?",
+                    correct: "Earth's rotation",
+                    wrong: ["The Moon", "The Sun moving"]
+                }
+            ],
+            medium: [
+                {
+                    question: "What is the closest major galaxy to our Milky Way galaxy?",
+                    correct: "Andromeda Galaxy",
+                    wrong: ["Triangulum Galaxy located about 3 million light-years away", "Whirlpool Galaxy in the constellation Canes Venatici"]
+                },
+                {
+                    question: "What is a supernova in astronomical terms?",
+                    correct: "An exploding star at the end of its life",
+                    wrong: ["A new star that is forming from gas clouds", "A black hole consuming a nearby star system"]
+                },
+                {
+                    question: "Approximately how many moons does the planet Jupiter have?",
+                    correct: "Over 90 confirmed natural satellites",
+                    wrong: ["Exactly 12 large icy moons", "About 50 rocky and icy moons"]
+                },
+                {
+                    question: "What is the Great Red Spot located on Jupiter?",
+                    correct: "A giant storm system larger than Earth",
+                    wrong: ["A massive volcanic crater on the surface", "An ocean of liquid methane and ammonia"]
+                },
+                {
+                    question: "What is the name of the galaxy that we live in?",
+                    correct: "Milky Way",
+                    wrong: ["Andromeda", "Triangulum"]
+                },
+                {
+                    question: "What does the term 'light-year' actually measure in space?",
+                    correct: "Distance light travels in one year",
+                    wrong: ["How long light lasts", "A year on a light planet"]
+                },
+                {
+                    question: "Which planet in our solar system rotates on its side?",
+                    correct: "Uranus",
+                    wrong: ["Neptune", "Saturn"]
+                },
+                {
+                    question: "What are the small rocky objects found between Mars and Jupiter called?",
+                    correct: "Asteroids",
+                    wrong: ["Comets", "Meteors"]
+                },
+                {
+                    question: "Who was the first human being to travel into outer space?",
+                    correct: "Yuri Gagarin",
+                    wrong: ["Neil Armstrong", "Alan Shepard"]
+                },
+                {
+                    question: "What is the largest moon in our entire solar system?",
+                    correct: "Ganymede",
+                    wrong: ["Titan", "Callisto"]
+                }
+            ],
+            hard: [
+                {
+                    question: "What is the most distant human-made object from planet Earth?",
+                    correct: "Voyager 1",
+                    wrong: ["New Horizons", "Pioneer 10"]
+                },
+                {
+                    question: "Approximately what percentage of the universe is made of dark matter?",
+                    correct: "About 27%",
+                    wrong: ["About 50%", "About 10%"]
+                },
+                {
+                    question: "What happens to matter at the event horizon of a black hole?",
+                    correct: "Nothing can escape, not even light",
+                    wrong: ["Time speeds up", "Matter explodes"]
+                },
+                {
+                    question: "What is the cosmic microwave background radiation in the universe?",
+                    correct: "Leftover radiation from the Big Bang",
+                    wrong: ["Radio waves from black holes", "Heat from stars"]
+                },
+                {
+                    question: "How long does it take for light from the Andromeda Galaxy to reach Earth?",
+                    correct: "2.5 million years",
+                    wrong: ["100,000 years", "10 million years"]
+                },
+                {
+                    question: "What is a quasar?",
+                    correct: "An extremely bright galactic center powered by a black hole",
+                    wrong: ["A type of star", "A colliding galaxy"]
+                },
+                {
+                    question: "What causes gravitational lensing?",
+                    correct: "Massive objects bending spacetime",
+                    wrong: ["Light reflecting off gases", "Magnetic fields"]
+                },
+                {
+                    question: "What is the largest structure in the observable universe?",
+                    correct: "The Hercules-Corona Borealis Great Wall",
+                    wrong: ["The Sloan Great Wall", "The Virgo Supercluster"]
+                },
+                {
+                    question: "What is redshift in astronomy?",
+                    correct: "Light stretched to longer wavelengths as objects move away",
+                    wrong: ["Stars turning red as they die", "Light absorbed by dust"]
+                },
+                {
+                    question: "What did the LIGO experiment detect in 2015?",
+                    correct: "Gravitational waves",
+                    wrong: ["Dark matter particles", "Neutrinos from space"]
+                }
+            ],
+            extrahard: [
+                {
+                    question: "What is Hawking radiation?",
+                    correct: "Theoretical radiation emitted by black holes",
+                    wrong: ["Radiation from neutron stars", "Cosmic background radiation", "Solar wind particles", "Gamma ray bursts"]
+                },
+                {
+                    question: "What is the Schwarzschild radius?",
+                    correct: "The radius of a black hole's event horizon",
+                    wrong: ["The size of a neutron star", "Distance to nearest galaxy", "Edge of the solar system", "Orbit of Mercury"]
+                },
+                {
+                    question: "What causes a Type Ia supernova?",
+                    correct: "A white dwarf exceeding the Chandrasekhar limit",
+                    wrong: ["A massive star collapsing", "Two neutron stars colliding", "A planet hitting a star", "Nuclear fusion stopping"]
+                },
+                {
+                    question: "What is cosmic inflation theory?",
+                    correct: "Rapid exponential expansion of the early universe",
+                    wrong: ["Galaxies moving apart", "Black holes growing", "Stars getting bigger", "Universe cooling down"]
+                },
+                {
+                    question: "What are magnetars?",
+                    correct: "Neutron stars with extremely powerful magnetic fields",
+                    wrong: ["Magnetic planets", "Metal asteroids", "Solar flares", "Charged black holes"]
+                },
+                {
+                    question: "What is the Planck length?",
+                    correct: "The smallest meaningful length in physics",
+                    wrong: ["Size of an atom", "Width of a quark", "Distance between stars", "Wavelength of light"]
+                },
+                {
+                    question: "What are cosmic strings?",
+                    correct: "Theoretical one-dimensional topological defects in spacetime",
+                    wrong: ["Galaxy filaments", "Solar wind streams", "Magnetic field lines", "Asteroid belts"]
+                },
+                {
+                    question: "What is the Omega Point in cosmology?",
+                    correct: "A hypothetical future state of maximum complexity",
+                    wrong: ["Center of a black hole", "Edge of universe", "Death of last star", "Big Bang singularity"]
+                },
+                {
+                    question: "What did the 2017 neutron star merger event prove?",
+                    correct: "Heavy elements are created in neutron star collisions",
+                    wrong: ["Black holes can merge", "Gravity travels at light speed", "Dark matter exists", "Wormholes are possible"]
+                },
+                {
+                    question: "What is the holographic principle?",
+                    correct: "Information in a volume can be encoded on its boundary",
+                    wrong: ["Universe is a simulation", "Black holes are holograms", "Light creates images", "Stars project light"]
+                }
+            ],
+            superhard: [
+                {
+                    question: "What is the approximate temperature of the cosmic microwave background?",
+                    correct: "2.7 Kelvin",
+                    wrong: ["3.5 Kelvin", "1.9 Kelvin", "4.2 Kelvin", "0.5 Kelvin", "5.8 Kelvin", "2.1 Kelvin", "3.0 Kelvin", "1.5 Kelvin"]
+                },
+                {
+                    question: "What phenomenon causes pulsars to emit regular radio pulses?",
+                    correct: "Rotation of neutron star with misaligned magnetic poles",
+                    wrong: ["Binary star orbits", "Stellar oscillations", "Gravitational lensing", "Accretion disk rotation", "Planetary transits", "Solar flares", "Magnetic reconnection", "Quantum fluctuations"]
+                },
+                {
+                    question: "What is the approximate age of the universe in billions of years?",
+                    correct: "13.8 billion years",
+                    wrong: ["10.5 billion years", "15.2 billion years", "12.1 billion years", "16.8 billion years", "11.3 billion years", "14.9 billion years", "9.7 billion years", "17.4 billion years"]
+                },
+                {
+                    question: "What is the Roche limit?",
+                    correct: "Distance where tidal forces break apart a satellite",
+                    wrong: ["Maximum size of a planet", "Speed limit in space", "Edge of a black hole", "Asteroid belt boundary", "Furthest observable distance", "Maximum star mass", "Comet orbit radius", "Galaxy collision point"]
+                },
+                {
+                    question: "What causes the Coriolis effect on rotating planets?",
+                    correct: "Conservation of angular momentum in rotating reference frames",
+                    wrong: ["Magnetic field interactions", "Gravitational pull variations", "Atmospheric pressure differences", "Solar wind deflection", "Tidal forces", "Centrifugal acceleration", "Orbital resonance", "Planetary wobble"]
+                },
+                {
+                    question: "What is a Kugelblitz?",
+                    correct: "A black hole formed from concentrated radiation",
+                    wrong: ["A type of supernova", "A gamma-ray burst", "A neutron star collision", "A quasar jet", "A stellar nursery", "A dark matter halo", "A cosmic string", "A white dwarf explosion"]
+                },
+                {
+                    question: "What is the approximate ratio of dark energy to dark matter in the universe?",
+                    correct: "About 68% dark energy, 27% dark matter",
+                    wrong: ["50% each", "80% dark energy, 15% dark matter", "30% dark energy, 65% dark matter", "90% dark energy, 5% dark matter", "40% dark energy, 55% dark matter", "75% dark energy, 20% dark matter", "60% dark energy, 35% dark matter", "85% dark energy, 10% dark matter"]
+                },
+                {
+                    question: "What is the Eddington limit?",
+                    correct: "Maximum luminosity a star can achieve before radiation pressure exceeds gravity",
+                    wrong: ["Maximum size of a galaxy", "Speed limit for spacecraft", "Furthest detectable distance", "Maximum black hole mass", "Highest possible temperature", "Minimum star size", "Maximum orbit speed", "Largest asteroid size"]
+                },
+                {
+                    question: "What causes Fast Radio Bursts (FRBs)?",
+                    correct: "Unknown - possibly magnetar flares or neutron star mergers",
+                    wrong: ["Black hole collisions", "Supernova explosions", "Pulsar emissions", "Solar flares", "Gamma ray bursts", "Quasar activity", "Dark matter interactions", "Cosmic string vibrations"]
+                },
+                {
+                    question: "What is the Chandrasekhar limit approximately?",
+                    correct: "1.4 solar masses",
+                    wrong: ["2.5 solar masses", "0.8 solar masses", "3.2 solar masses", "1.0 solar masses", "4.1 solar masses", "0.5 solar masses", "2.0 solar masses", "5.0 solar masses"]
+                }
+            ],
+            bonus: [
+                {
+                    question: "What is the longest river in the world?",
+                    correct: "The Nile River in Africa",
+                    wrong: ["The Amazon River in South America", "The Mississippi River in North America", "The Yangtze River in Asia", "The Congo River in Africa"]
+                },
+                {
+                    question: "What year did the Titanic sink in the Atlantic Ocean?",
+                    correct: "1912",
+                    wrong: ["1905", "1918", "1920", "1915"]
+                },
+                {
+                    question: "What is the largest ocean on planet Earth?",
+                    correct: "The Pacific Ocean",
+                    wrong: ["The Atlantic Ocean", "The Indian Ocean", "The Arctic Ocean", "The Southern Ocean"]
+                },
+                {
+                    question: "Who painted the famous Mona Lisa artwork?",
+                    correct: "Leonardo da Vinci",
+                    wrong: ["Michelangelo", "Pablo Picasso", "Vincent van Gogh", "Rembrandt"]
+                },
+                {
+                    question: "What is the tallest mountain on Earth?",
+                    correct: "Mount Everest",
+                    wrong: ["K2", "Kilimanjaro", "Mount McKinley", "Matterhorn"]
+                },
+                {
+                    question: "What is the capital city of France?",
+                    correct: "Paris",
+                    wrong: ["London", "Berlin", "Rome", "Madrid"]
+                },
+                {
+                    question: "How many continents are there on Earth?",
+                    correct: "7 continents",
+                    wrong: ["5 continents", "6 continents", "8 continents", "4 continents"]
+                },
+                {
+                    question: "What gas do plants absorb from the atmosphere?",
+                    correct: "Carbon dioxide (CO2)",
+                    wrong: ["Oxygen (O2)", "Nitrogen (N2)", "Helium (He)", "Hydrogen (H2)"]
+                },
+                {
+                    question: "What is the largest land animal on Earth?",
+                    correct: "The African elephant",
+                    wrong: ["The blue whale", "The giraffe", "The hippopotamus", "The rhinoceros"]
+                },
+                {
+                    question: "Who wrote the play Romeo and Juliet?",
+                    correct: "William Shakespeare",
+                    wrong: ["Charles Dickens", "Mark Twain", "Jane Austen", "Edgar Allan Poe"]
+                }
+            ]
+        };
+
+        // Bonus questions (not about space - triggered after 5-question streak!)
+        const bonusQuestions = [
+            {
+                question: "What is the largest ocean on Earth?",
+                correct: "Pacific Ocean",
+                wrong: ["Atlantic Ocean", "Indian Ocean"]
+            },
+            {
+                question: "How many bones are in the adult human body?",
+                correct: "206",
+                wrong: ["189", "243"]
+            },
+            {
+                question: "What is the capital city of Australia?",
+                correct: "Canberra",
+                wrong: ["Sydney", "Melbourne"]
+            },
+            {
+                question: "Who painted the Mona Lisa?",
+                correct: "Leonardo da Vinci",
+                wrong: ["Michelangelo", "Raphael"]
+            },
+            {
+                question: "What is the fastest land animal on Earth?",
+                correct: "Cheetah",
+                wrong: ["Lion", "Gazelle"]
+            },
+            {
+                question: "How many continents are there on Earth?",
+                correct: "7",
+                wrong: ["5", "6"]
+            },
+            {
+                question: "What is the tallest mountain in the world?",
+                correct: "Mount Everest",
+                wrong: ["K2", "Kilimanjaro"]
+            },
+            {
+                question: "What gas do plants absorb from the atmosphere?",
+                correct: "Carbon Dioxide",
+                wrong: ["Oxygen", "Nitrogen"]
+            },
+            {
+                question: "How many hearts does an octopus have?",
+                correct: "3",
+                wrong: ["1", "2"]
+            },
+            {
+                question: "What is the smallest country in the world?",
+                correct: "Vatican City",
+                wrong: ["Monaco", "San Marino"]
+            },
+            {
+                question: "What is the chemical symbol for gold?",
+                correct: "Au",
+                wrong: ["Go", "Gd"]
+            },
+            {
+                question: "How many legs does a spider have?",
+                correct: "8",
+                wrong: ["6", "10"]
+            },
+            {
+                question: "What is the largest mammal in the world?",
+                correct: "Blue Whale",
+                wrong: ["African Elephant", "Giraffe"]
+            },
+            {
+                question: "What is the hardest natural substance on Earth?",
+                correct: "Diamond",
+                wrong: ["Steel", "Granite"]
+            },
+            {
+                question: "How many teeth does an adult human have?",
+                correct: "32",
+                wrong: ["28", "36"]
+            },
+            {
+                question: "What is the main ingredient in guacamole?",
+                correct: "Avocado",
+                wrong: ["Tomato", "Lime"]
+            },
+            {
+                question: "What is the largest organ in the human body?",
+                correct: "Skin",
+                wrong: ["Liver", "Brain"]
+            },
+            {
+                question: "How many sides does a hexagon have?",
+                correct: "6",
+                wrong: ["5", "8"]
+            },
+            {
+                question: "What is the boiling point of water in Celsius?",
+                correct: "100 degrees",
+                wrong: ["212 degrees", "90 degrees"]
+            },
+            {
+                question: "What is the capital of France?",
+                correct: "Paris",
+                wrong: ["London", "Berlin"]
+            },
+            {
+                question: "How many strings does a standard guitar have?",
+                correct: "6",
+                wrong: ["5", "7"]
+            },
+            {
+                question: "What do bees make?",
+                correct: "Honey",
+                wrong: ["Wax", "Pollen"]
+            },
+            {
+                question: "What is the largest bird in the world?",
+                correct: "Ostrich",
+                wrong: ["Eagle", "Albatross"]
+            },
+            {
+                question: "How many colors are in a rainbow?",
+                correct: "7",
+                wrong: ["6", "8"]
+            },
+            {
+                question: "What is the longest river in the world?",
+                correct: "Nile River",
+                wrong: ["Amazon River", "Mississippi River"]
+            },
+            {
+                question: "What language is spoken in Brazil?",
+                correct: "Portuguese",
+                wrong: ["Spanish", "Brazilian"]
+            },
+            {
+                question: "How many players are on a basketball team on the court?",
+                correct: "5",
+                wrong: ["6", "7"]
+            },
+            {
+                question: "What is the freezing point of water in Fahrenheit?",
+                correct: "32 degrees",
+                wrong: ["0 degrees", "40 degrees"]
+            },
+            {
+                question: "What is the largest desert in the world?",
+                correct: "Antarctic Desert",
+                wrong: ["Sahara Desert", "Arabian Desert"]
+            },
+            {
+                question: "How many zeros are in one million?",
+                correct: "6",
+                wrong: ["5", "7"]
+            }
+        ];
+
+        // Load high score from browser storage
+        if (localStorage.getItem('spaceTrivia_highScore')) {
+            highScore = parseInt(localStorage.getItem('spaceTrivia_highScore'));
+            document.getElementById('highScore').textContent = highScore;
+        }
+
+        // Create stars background
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.width = Math.random() * 3 + 'px';
+                star.style.height = star.style.width;
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        createStars();
+
+        // Set initial high score and leaderboard
+        document.getElementById('highScore').textContent = highScore;
+        updateLeaderboard();
+
+        function updateLeaderboard() {
+            const leaderboardList = document.getElementById('leaderboardList');
+            leaderboardList.innerHTML = '';
+            
+            if (topScores.length === 0) {
+                leaderboardList.innerHTML = '<li class="leaderboard-item"><span class="leaderboard-rank">No scores yet</span><span class="leaderboard-score">-</span></li>';
+                return;
+            }
+            
+            topScores.forEach((entry, index) => {
+                const li = document.createElement('li');
+                li.className = 'leaderboard-item';
+                
+                // Make #1 clickable for secret reset
+                if (index === 0) {
+                    li.style.cursor = 'pointer';
+                    li.style.userSelect = 'none'; // Prevent text selection
+                    li.style.webkitUserSelect = 'none'; // Safari
+                    li.style.msUserSelect = 'none'; // IE
+                    li.title = 'Click 5 times to reset';
+                    
+                    let clickCount = 0;
+                    let clickTimeout;
+                    
+                    li.onclick = (e) => {
+                        e.preventDefault(); // Prevent default behavior
+                        clickCount++;
+                        clearTimeout(clickTimeout);
+                        
+                        console.log('Click count:', clickCount); // Debug
+                        
+                        if (clickCount >= 5) {
+                            // Show custom reset confirmation overlay
+                            const resetOverlay = document.createElement('div');
+                            resetOverlay.className = 'game-over-overlay';
+                            resetOverlay.innerHTML = `
+                                <div class="game-over-box">
+                                    <div style="font-size: 2.5em; margin-bottom: 20px; font-weight: bold; color: #ffd700;">🔐 Secret Reset</div>
+                                    <div style="font-size: 1.5em; margin-bottom: 30px;">Are you sure you want to reset all scores?</div>
+                                    <div style="font-size: 1.1em; color: #a0aec0; margin-bottom: 30px;">This will clear the entire leaderboard and reset the high score!</div>
+                                    <div style="display: flex; gap: 20px; justify-content: center;">
+                                        <button id="confirmResetBtn" style="padding: 15px 40px; font-size: 1.2em; background: #f56565; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold;">Yes, Reset</button>
+                                        <button id="cancelResetBtn" style="padding: 15px 40px; font-size: 1.2em; background: #4a5568; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold;">Cancel</button>
+                                    </div>
+                                </div>
+                            `;
+                            document.body.appendChild(resetOverlay);
+                            
+                            document.getElementById('confirmResetBtn').onclick = () => {
+                                resetOverlay.remove();
+                                resetScores();
+                            };
+                            
+                            document.getElementById('cancelResetBtn').onclick = () => {
+                                resetOverlay.remove();
+                            };
+                            
+                            clickCount = 0;
+                        } else {
+                            // Reset counter after 2 seconds
+                            clickTimeout = setTimeout(() => {
+                                clickCount = 0;
+                            }, 2000);
+                        }
+                    };
+                }
+                
+                li.innerHTML = `
+                    <span class="leaderboard-rank">#${index + 1} ${entry.name}</span>
+                    <span class="leaderboard-score">${entry.score}</span>
+                `;
+                leaderboardList.appendChild(li);
+            });
+        }
+
+        function resetScores() {
+            // Clear all scores
+            highScore = 50;
+            topScores = [{ name: "Claude", score: 50 }];
+            score = 0;
+            questionCount = 0;
+            streak = 0;
+            
+            // Clear from storage
+            localStorage.removeItem('spaceTrivia_highScore');
+            localStorage.removeItem('spaceTrivia_topScores');
+            
+            // Update all displays
+            document.getElementById('highScore').textContent = '50';
+            document.getElementById('score').textContent = '0';
+            document.getElementById('questionCount').textContent = '0';
+            document.getElementById('streak').textContent = '0';
+            updateLeaderboard();
+            
+            alert('All scores have been reset! ✅');
+        }
+
+        // Difficulty selection
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentDifficulty = btn.dataset.difficulty;
+            });
+        });
+
+        function startGame() {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'flex';
+            document.querySelector('.container').classList.add('game-active');
+            
+            // Disable difficulty buttons during gameplay
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+            });
+            
+            // Reset game over flag
+            gameOverTriggered = false;
+            
+            // Start the 1-minute timer
+            timeLeft = 60;
+            updateTimerDisplay();
+            
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                // Change color when time is running low
+                const timerEl = document.getElementById('timer');
+                if (timeLeft <= 10) {
+                    timerEl.style.color = '#ff0000'; // Red
+                    timerEl.style.animation = 'pulse 0.5s infinite';
+                } else if (timeLeft <= 30) {
+                    timerEl.style.color = '#ffa500'; // Orange
+                }
+                
+                // Time's up!
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timeUpGameOver();
+                }
+            }, 1000);
+            
+            nextQuestion();
+        }
+        
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        function timeUpGameOver() {
+            // Check if game over already happened (from Easy wrong answer)
+            if (gameOverTriggered) {
+                console.log('Game over already triggered, skipping timer game over');
+                return;
+            }
+            
+            gameOverTriggered = true;
+            
+            // Create time's up overlay
+            const overlay = document.createElement('div');
+            overlay.className = 'game-over-overlay';
+            
+            // Check if score makes top 5
+            let wouldMakeList = topScores.length < 5;
+            if (!wouldMakeList && topScores.length > 0) {
+                const lowestScore = topScores[topScores.length - 1].score || topScores[topScores.length - 1];
+                wouldMakeList = score > lowestScore;
+            }
+            
+            const nameInputHTML = (wouldMakeList && score > 0) ? `
+                <div style="margin-top: 25px; padding: 25px; background: rgba(72, 187, 120, 0.2); border: 2px solid #48bb78; border-radius: 15px;">
+                    <div style="font-size: 1.5em; margin-bottom: 15px; color: #48bb78;">🎉 You made the Top 5! 🎉</div>
+                    <div style="font-size: 1.2em; margin-bottom: 10px;">Enter your name:</div>
+                    <input type="text" id="playerNameInput"  style="width: 80%; padding: 12px; font-size: 1.2em; border: 2px solid #48bb78; background: rgba(255,255,255,0.9); color: #000; border-radius: 8px; text-align: center;" placeholder="Your name here">
+                    <button id="submitNameBtn" onclick="window.submitPlayerName()" style="display: block; margin: 15px auto 0; padding: 12px 30px; font-size: 1.1em; background: #48bb78; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">Submit</button>
+                </div>
+            ` : '<div style="margin-top: 15px; font-style: italic;">Restarting in 3 seconds...</div>';
+            
+            overlay.innerHTML = `
+                <div class="game-over-box">
+                    <div style="font-size: 3em; margin-bottom: 20px; font-weight: bold; color: #ffa500;">⏰ MISSION COMPLETE! ⏰</div>
+                    <div style="font-size: 1.5em; margin-bottom: 15px;">You survived the alien attack!</div>
+                    <div style="font-size: 1.3em; margin-bottom: 20px; color: #48bb78;">✅ EARTH IS SAFE... FOR NOW ✅</div>
+                    <div style="font-size: 2em; color: #4facfe; margin: 20px 0;">Final Score: <strong>${score}</strong></div>
+                    <div style="font-size: 1.2em; color: #a0aec0;">Questions Answered: ${questionCount}</div>
+                    ${nameInputHTML}
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            
+            // If they made top 5, set up name submission
+            if (wouldMakeList && score > 0) {
+                const submitBtn = document.getElementById('submitNameBtn');
+                const nameInput = document.getElementById('playerNameInput');
+                
+                // Create global function for onclick
+                window.submitPlayerName = () => {
+                    alert('Submit button clicked!'); // DEBUG
+                    let playerName = nameInput.value.trim();
+                    alert('Name entered: ' + playerName); // DEBUG
+                    if (!playerName) playerName = 'Anonymous';
+                    
+                    topScores.push({ name: playerName, score: score });
+                    topScores.sort((a, b) => b.score - a.score);
+                    topScores = topScores.slice(0, 5);
+                    localStorage.setItem('spaceTrivia_topScores', JSON.stringify(topScores));
+                    updateLeaderboard();
+                    
+                    overlay.remove();
+                    goHome();
+                };
+                
+                // Also attach via JavaScript as backup
+                if (submitBtn) {
+                    submitBtn.onclick = window.submitPlayerName;
+                }
+                
+                // Enter key support
+                if (nameInput) {
+                    nameInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') window.submitPlayerName();
+                    });
+                    setTimeout(() => nameInput.focus(), 100);
+                }
+            } else {
+                setTimeout(() => {
+                    overlay.remove();
+                    goHome();
+                }, 3000);
+            }
+        }
+
+        function goHome() {
+            // Stop the timer
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            
+            // Reset game over flag
+            gameOverTriggered = false;
+            
+            // Reset score and stats (but keep high score)
+            score = 0;
+            questionCount = 0;
+            streak = 0;
+            timeLeft = 60;
+            isBonusQuestion = false;
+            
+            // Update display
+            document.getElementById('score').textContent = score;
+            document.getElementById('questionCount').textContent = questionCount;
+            document.getElementById('streak').textContent = streak;
+            document.getElementById('timer').textContent = '1:00';
+            document.getElementById('timer').style.color = '#ff6b6b';
+            document.getElementById('timer').style.animation = 'none';
+            
+            // Hide game screen and show start screen
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('startScreen').style.display = 'block';
+            document.querySelector('.container').classList.remove('game-active');
+            
+            // Re-enable difficulty buttons
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+            });
+            
+            // Clear any feedback
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+        }
+
+        function updateDifficultyButtons() {
+            // Update which difficulty button is highlighted
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.difficulty === currentDifficulty) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        function launchRocket() {
+            const rocket = document.createElement('div');
+            rocket.className = 'rocket';
+            rocket.textContent = '🚀';
+            document.body.appendChild(rocket);
+            
+            // Remove rocket after animation
+            setTimeout(() => {
+                rocket.remove();
+            }, 3000);
+        }
+
+        function launchFireworks() {
+            const container = document.getElementById('fireworkContainer');
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffa500'];
+            
+            // Create multiple firework bursts
+            for (let burst = 0; burst < 5; burst++) {
+                setTimeout(() => {
+                    const x = Math.random() * window.innerWidth;
+                    const y = Math.random() * (window.innerHeight / 2);
+                    
+                    // Create particles for this burst
+                    for (let i = 0; i < 30; i++) {
+                        const firework = document.createElement('div');
+                        firework.className = 'firework';
+                        firework.style.left = x + 'px';
+                        firework.style.top = y + 'px';
+                        firework.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                        
+                        const angle = (Math.PI * 2 * i) / 30;
+                        const velocity = 50 + Math.random() * 100;
+                        const tx = Math.cos(angle) * velocity;
+                        const ty = Math.sin(angle) * velocity;
+                        
+                        firework.style.setProperty('--tx', tx + 'px');
+                        firework.style.setProperty('--ty', ty + 'px');
+                        firework.style.animation = 'fireworkExplode 1s ease-out forwards';
+                        
+                        container.appendChild(firework);
+                        
+                        // Remove particle after animation
+                        setTimeout(() => {
+                            firework.remove();
+                        }, 1000);
+                    }
+                }, burst * 300);
+            }
+        }
+
+        async function generateQuestion() {
+            // Check if player has 5-question streak - BONUS TIME!
+            if (streak === 5) {
+                // Pick a random bonus question
+                const randomQ = bonusQuestions[Math.floor(Math.random() * bonusQuestions.length)];
+                
+                const correct = randomQ.correct;
+                const choices = [correct, ...randomQ.wrong];
+                
+                // Shuffle the choices
+                for (let i = choices.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [choices[i], choices[j]] = [choices[j], choices[i]];
+                }
+                
+                return {
+                    question: "🎁 BONUS QUESTION! 🎁 " + randomQ.question,
+                    answer: correct,
+                    choices: choices,
+                    correctIndex: choices.indexOf(correct)
+                };
+            }
+            
+            // Regular question from current difficulty
+            const questions = questionBank[currentDifficulty];
+            
+            // Pick a random question
+            const randomQ = questions[Math.floor(Math.random() * questions.length)];
+            
+            const correct = randomQ.correct;
+            const choices = [correct, ...randomQ.wrong];
+            
+            // Shuffle the choices
+            for (let i = choices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [choices[i], choices[j]] = [choices[j], choices[i]];
+            }
+            
+            return {
+                question: randomQ.question,
+                answer: correct,
+                choices: choices,
+                correctIndex: choices.indexOf(correct)
+            };
+        }
+
+        async function nextQuestion() {
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+            
+            // Reset choice buttons
+            const choiceBtns = document.querySelectorAll('.choice-btn');
+            choiceBtns.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.remove('selected-correct', 'selected-wrong', 'show-correct');
+                btn.style.display = 'none'; // Hide all first
+            });
+            
+            document.getElementById('question').innerHTML = '<span class="loading">🌟 Loading next question...</span>';
+            
+            const qa = await generateQuestion();
+            currentQuestion = qa.question;
+            currentAnswer = qa.answer;
+            currentChoices = qa.choices;
+            correctChoiceIndex = qa.correctIndex;
+            
+            document.getElementById('question').textContent = currentQuestion;
+            
+            // Display choices (3 for easy/medium/hard, 5 for extrahard)
+            choiceBtns.forEach((btn, index) => {
+                if (index < currentChoices.length) {
+                    btn.textContent = currentChoices[index];
+                    btn.disabled = false;
+                    btn.style.display = 'block';
+                }
+            });
+        }
+
+        function checkAnswer(userAnswer, correctAnswer) {
+            // Simple answer checking - looks for key words
+            const userLower = userAnswer.toLowerCase().trim();
+            const correctLower = correctAnswer.toLowerCase().trim();
+            
+            // Check if the main answer word is in the user's answer
+            const mainWord = correctLower.split(' ')[0];
+            const isCorrect = userLower.includes(mainWord) || 
+                            userLower === correctLower ||
+                            correctLower.includes(userLower);
+            
+            // Fun facts for different topics
+            const funFacts = [
+                "The Sun is so big that about 1.3 million Earths could fit inside it!",
+                "A day on Venus is longer than a year on Venus!",
+                "Jupiter's Great Red Spot is a storm that's been raging for at least 400 years!",
+                "Neutron stars are so dense that a teaspoon of their material would weigh billions of tons!",
+                "There are more stars in the universe than grains of sand on all of Earth's beaches!",
+                "Saturn's rings are made mostly of ice and rock particles!",
+                "Mars has the largest volcano in our solar system - Olympus Mons!",
+                "Light from the Sun takes about 8 minutes to reach Earth!",
+                "The Moon is slowly moving away from Earth at about 3.8 cm per year!",
+                "There are probably more than 100 billion galaxies in the observable universe!"
+            ];
+            
+            const randomFact = funFacts[Math.floor(Math.random() * funFacts.length)];
+            
+            return {
+                isCorrect: isCorrect,
+                funFact: randomFact
+            };
+        }
+
+        function selectAnswer(choiceIndex) {
+            console.log('Button clicked! Choice index:', choiceIndex);
+            
+            const choiceBtns = document.querySelectorAll('.choice-btn');
+            const userAnswer = currentChoices[choiceIndex];
+            const isCorrect = choiceIndex === correctChoiceIndex;
+            
+            console.log('User selected:', userAnswer);
+            console.log('Is correct?', isCorrect);
+            
+            // Disable all buttons
+            choiceBtns.forEach(btn => btn.disabled = true);
+            
+            questionCount++;
+            document.getElementById('questionCount').textContent = questionCount;
+
+            const feedbackEl = document.getElementById('feedback');
+            
+            const compliments = [
+                "Amazing!", "Brilliant!", "Fantastic!", "Excellent!", "Outstanding!",
+                "You're a space genius!", "Incredible!", "Super smart!", "Wow!",
+                "You're stellar!", "Out of this world!", "You rock!"
+            ];
+            
+            const funFacts = [
+                "The Sun is so big that about 1.3 million Earths could fit inside it!",
+                "A day on Venus is longer than a year on Venus!",
+                "Jupiter's Great Red Spot is a storm that's been raging for at least 400 years!",
+                "Neutron stars are so dense that a teaspoon of their material would weigh billions of tons!",
+                "There are more stars in the universe than grains of sand on all of Earth's beaches!",
+                "Saturn's rings are made mostly of ice and rock particles!",
+                "Mars has the largest volcano in our solar system - Olympus Mons!",
+                "Light from the Sun takes about 8 minutes to reach Earth!",
+                "The Moon is slowly moving away from Earth at about 3.8 cm per year!",
+                "There are probably more than 100 billion galaxies in the observable universe!"
+            ];
+            
+            const randomFact = funFacts[Math.floor(Math.random() * funFacts.length)];
+            
+            if (isCorrect) {
+                // Bonus question worth double points!
+                const basePoints = currentDifficulty === 'easy' ? 10 : 
+                              currentDifficulty === 'medium' ? 20 : 
+                              currentDifficulty === 'hard' ? 30 : 
+                              currentDifficulty === 'extrahard' ? 50 : 100;
+                
+                const points = isBonusQuestion ? basePoints * 2 : basePoints;
+                score += points;
+                streak++;
+                const randomCompliment = compliments[Math.floor(Math.random() * compliments.length)];
+                
+                // Check for halfway to high score milestone (rocket launch!)
+                const halfwayScore = Math.floor(highScore / 2);
+                const wasBeforeHalfway = (score - points) < halfwayScore;
+                const isNowAtHalfway = score >= halfwayScore && highScore > 0 && wasBeforeHalfway;
+                
+                if (isNowAtHalfway) {
+                    launchRocket();
+                }
+                
+                // Move up in difficulty after correct answer
+                if (currentDifficulty === 'easy') {
+                    currentDifficulty = 'medium';
+                    updateDifficultyButtons();
+                } else if (currentDifficulty === 'medium') {
+                    currentDifficulty = 'hard';
+                    updateDifficultyButtons();
+                } else if (currentDifficulty === 'hard') {
+                    currentDifficulty = 'extrahard';
+                    updateDifficultyButtons();
+                } else if (currentDifficulty === 'extrahard') {
+                    currentDifficulty = 'superhard';
+                    updateDifficultyButtons();
+                }
+                // If already at superhard, stay there
+                
+                // Check and update high score
+                if (score > highScore) {
+                    const oldHighScore = highScore;
+                    highScore = score;
+                    localStorage.setItem('spaceTrivia_highScore', highScore);
+                    document.getElementById('highScore').textContent = highScore;
+                    
+                    // Launch fireworks for new high score!
+                    if (oldHighScore > 0) {
+                        launchFireworks();
+                    }
+                }
+                
+                // Highlight the correct choice
+                choiceBtns[choiceIndex].classList.add('selected-correct');
+                
+                feedbackEl.className = 'feedback correct';
+                
+                // Special message for bonus question
+                if (isBonusQuestion) {
+                    feedbackEl.innerHTML = `
+                        <div style="font-size: 1.8em; margin-bottom: 10px;">🎁 BONUS CORRECT! 🎁</div>
+                        <div style="font-size: 1.3em; margin-bottom: 10px;">${randomCompliment} You earned DOUBLE POINTS!</div>
+                        <div style="font-size: 1.2em; color: #ffd700;">+${points} points (${basePoints} × 2)</div>
+                        <div class="fun-fact">💡 ${randomFact}</div>
+                    `;
+                } else if (score === highScore && score > 0) {
+                    // Add special celebration for new high score
+                    feedbackEl.innerHTML = `
+                        <div style="font-size: 1.5em; margin-bottom: 10px;">🏆 NEW HIGH SCORE! 🏆</div>
+                        <div style="font-size: 1.3em; margin-bottom: 10px;">✅ ${randomCompliment} You're correct!</div>
+                        <div>Your answer: <strong>${userAnswer}</strong></div>
+                        <div class="fun-fact">💡 ${randomFact}</div>
+                    `;
+                } else {
+                    feedbackEl.innerHTML = `
+                        <div style="font-size: 1.3em; margin-bottom: 10px;">✅ ${randomCompliment} You're correct!</div>
+                        <div>Your answer: <strong>${userAnswer}</strong></div>
+                        <div class="fun-fact">💡 ${randomFact}</div>
+                    `;
+                }
+
+            document.getElementById('score').textContent = score;
+            document.getElementById('streak').textContent = streak;
+            document.getElementById('nextBtn').style.display = 'block';
+            } else {
+                streak = 0;
+                
+                // GAME OVER if wrong on Easy difficulty
+                if (currentDifficulty === 'easy') {
+                    
+                    // Set flag to prevent timer game over from also showing
+                    gameOverTriggered = true;
+                    
+                    // Stop the timer!
+                    if (timerInterval) {
+                        clearInterval(timerInterval);
+                        timerInterval = null;
+                    }
+                    
+                    // BIG TEST ALERT
+                    alert('GAME OVER TRIGGERED! You got an Easy question wrong. Score: ' + score);
+                    
+                    // Highlight wrong choice and show correct choice
+                    choiceBtns[choiceIndex].classList.add('selected-wrong');
+                    choiceBtns[correctChoiceIndex].classList.add('show-correct');
+                    
+                    // Check if score makes the top 5
+                    console.log('Game Over! Score:', score);
+                    console.log('Current topScores:', topScores);
+                    
+                    let wouldMakeList = true; // TEMPORARY: Always true for testing
+                    console.log('Would make top 5?', wouldMakeList);
+                    
+                    // Create name input HTML if they made top 5
+                    const nameInputHTML = (wouldMakeList && score > 0) ? `
+                        <div style="margin-top: 25px; padding: 25px; background: rgba(72, 187, 120, 0.2); border: 2px solid #48bb78; border-radius: 15px;">
+                            <div style="font-size: 1.5em; margin-bottom: 15px; color: #48bb78;">🎉 You made the Top 5! 🎉</div>
+                            <div style="font-size: 1.2em; margin-bottom: 10px;">Enter your name:</div>
+                            <input type="text" id="playerNameInputAliens"  style="width: 80%; padding: 12px; font-size: 1.2em; border: 2px solid #48bb78; background: rgba(255,255,255,0.9); color: #000; border-radius: 8px; text-align: center;" placeholder="Your name here">
+                            <button id="submitNameBtnAliens" onclick="window.submitPlayerNameAliens()" style="display: block; margin: 15px auto 0; padding: 12px 30px; font-size: 1.1em; background: #48bb78; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">Submit</button>
+                        </div>
+                    ` : '<div style="margin-top: 15px; font-style: italic;">Restarting in 3 seconds...</div>';
+                    
+                    // Create game over overlay
+                    const overlay = document.createElement('div');
+                    overlay.className = 'game-over-overlay';
+                    overlay.innerHTML = `
+                        <div class="game-over-box">
+                            <div style="font-size: 3em; margin-bottom: 20px; font-weight: bold; color: #ff0000;">👽 ALIENS WIN! 👽</div>
+                            <div style="font-size: 1.5em; margin-bottom: 15px;">You failed to answer an Easy question!</div>
+                            <div style="font-size: 1.2em; margin-bottom: 10px; color: #ff6b6b;">The aliens have conquered Earth...</div>
+                            <div style="font-size: 1.2em; margin-bottom: 10px;">Your answer: <strong>${userAnswer}</strong></div>
+                            <div style="font-size: 1.2em; margin-bottom: 15px;">Correct answer: <strong>${currentAnswer}</strong></div>
+                            <div style="font-size: 2em; color: #4facfe; margin: 20px 0;">Final Score: <strong>${score}</strong></div>
+                            <div style="font-size: 1.1em; color: #a0aec0; margin-top: 15px;">${randomFact}</div>
+                            ${nameInputHTML}
+                        </div>
+                    `;
+                    document.body.appendChild(overlay);
+                    
+                    // If they made top 5, set up the name submission
+                    if (wouldMakeList && score > 0) {
+                        const submitBtn = document.getElementById('submitNameBtnAliens');
+                        const nameInput = document.getElementById('playerNameInputAliens');
+                        
+                        // Create global function for onclick
+                        window.submitPlayerNameAliens = () => {
+                            alert('Submit button clicked (Aliens)!'); // DEBUG
+                            let playerName = nameInput.value.trim();
+                            alert('Name entered: ' + playerName); // DEBUG
+                            if (!playerName) playerName = 'Anonymous';
+                            
+                            // Add to leaderboard
+                            topScores.push({ name: playerName, score: score });
+                            topScores.sort((a, b) => b.score - a.score);
+                            topScores = topScores.slice(0, 5);
+                            localStorage.setItem('spaceTrivia_topScores', JSON.stringify(topScores));
+                            updateLeaderboard();
+                            
+                            // Remove overlay and go home
+                            overlay.remove();
+                            goHome();
+                        };
+                        
+                        // Attach via JavaScript
+                        if (submitBtn) {
+                            submitBtn.onclick = window.submitPlayerNameAliens;
+                        }
+                        
+                        // Enter key support
+                        if (nameInput) {
+                            nameInput.addEventListener('keypress', (e) => {
+                                if (e.key === 'Enter') window.submitPlayerNameAliens();
+                            });
+                            // Focus the input
+                            setTimeout(() => nameInput.focus(), 100);
+                        }
+                    } else {
+                        // Auto-restart if didn't make top 5
+                        setTimeout(() => {
+                            overlay.remove();
+                            goHome();
+                        }, 3000);
+                    }
+                    
+                } else {
+                    // Move down in difficulty after wrong answer (if not on Easy)
+                    if (currentDifficulty === 'superhard') {
+                        currentDifficulty = 'extrahard';
+                        updateDifficultyButtons();
+                    } else if (currentDifficulty === 'extrahard') {
+                        currentDifficulty = 'hard';
+                        updateDifficultyButtons();
+                    } else if (currentDifficulty === 'hard') {
+                        currentDifficulty = 'medium';
+                        updateDifficultyButtons();
+                    } else if (currentDifficulty === 'medium') {
+                        currentDifficulty = 'easy';
+                        updateDifficultyButtons();
+                    }
+                    
+                    // Highlight wrong choice and show correct choice
+                    choiceBtns[choiceIndex].classList.add('selected-wrong');
+                    choiceBtns[correctChoiceIndex].classList.add('show-correct');
+                    
+                    feedbackEl.className = 'feedback incorrect';
+                    feedbackEl.innerHTML = `
+                        <div style="font-size: 1.3em; margin-bottom: 10px;">❌ Not quite, but nice try!</div>
+                        <div>Your answer: <strong>${userAnswer}</strong></div>
+                        <div style="margin-top: 10px;">The correct answer is: <strong>${currentAnswer}</strong></div>
+                        <div class="fun-fact">💡 ${randomFact}</div>
+                    `;
+                    
+                    document.getElementById('score').textContent = score;
+                    document.getElementById('streak').textContent = streak;
+                    document.getElementById('nextBtn').style.display = 'block';
+                }
+            }
+
+            document.getElementById('score').textContent = score;
+            document.getElementById('streak').textContent = streak;
+            document.getElementById('nextBtn').style.display = 'block';
+            document.getElementById('nextBtn').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    </script>
+
+
+</body></html>
