@@ -80,6 +80,12 @@
             overflow: hidden;
         }
 
+        .container.game-active .choice-btn {
+            padding: 8px 12px;
+            min-height: 34px;
+            font-size: 0.9em;
+        }
+
         h1 {
             text-align: center;
             font-size: 2.5em;
@@ -1753,13 +1759,11 @@
             document.getElementById('gameScreen').style.display = 'flex';
             document.getElementById('scoreBoard').style.display = '';
             document.querySelector('.container').classList.add('game-active');
-            
-            // Disable difficulty buttons during gameplay
-            document.querySelectorAll('.difficulty-btn').forEach(btn => {
-                btn.disabled = true;
-                btn.style.opacity = '0.5';
-                btn.style.cursor = 'not-allowed';
-            });
+
+            // Hide setup elements during gameplay to maximize space
+            document.querySelector('.difficulty-select').style.display = 'none';
+            document.querySelector('h1').style.display = 'none';
+            document.querySelector('.subtitle').style.display = 'none';
             
             // Reset game over flag
             gameOverTriggered = false;
@@ -1911,7 +1915,12 @@
             document.getElementById('startScreen').style.display = 'block';
             document.getElementById('scoreBoard').style.display = 'none';
             document.querySelector('.container').classList.remove('game-active');
-            
+
+            // Restore setup elements
+            document.querySelector('.difficulty-select').style.display = '';
+            document.querySelector('h1').style.display = '';
+            document.querySelector('.subtitle').style.display = '';
+
             // Re-enable difficulty buttons
             document.querySelectorAll('.difficulty-btn').forEach(btn => {
                 btn.disabled = false;
