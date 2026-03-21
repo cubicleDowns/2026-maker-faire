@@ -1046,7 +1046,7 @@
         <h1>🚀 Space Trivia Challenge 👽</h1>
         <p class="subtitle">DEFEND EARTH FROM THE ALIEN INVASION!</p>
         
-        <div class="score-board">
+        <div class="score-board" id="scoreBoard" style="display: none;">
             <div class="score-item">
                 <div class="score-label">Score</div>
                 <div class="score-value" id="score">0</div>
@@ -1080,19 +1080,17 @@
         </div>
 
         <div id="startScreen" class="start-screen">
-            <div style="background: rgba(255, 0, 0, 0.1); border: 2px solid #ff6b6b; border-radius: 15px; padding: 25px; margin-bottom: 25px;">
-                <div style="font-size: 2em; margin-bottom: 15px;">👽 ALIEN INVASION! 👽</div>
-                <div style="font-size: 1.2em; line-height: 1.6; color: #e0e0e0;">
+            <div style="background: rgba(255, 0, 0, 0.1); border: 2px solid #ff6b6b; border-radius: 15px; padding: 15px; margin-bottom: 15px;">
+                <div style="font-size: 1.5em; margin-bottom: 8px;">👽 ALIEN INVASION! 👽</div>
+                <div style="font-size: 1em; line-height: 1.4; color: #e0e0e0;">
                     <strong>URGENT MESSAGE FROM EARTH DEFENSE:</strong><br>
-                    Hostile aliens have arrived and are threatening humanity! 
-                    They will only spare us if we can prove our knowledge of the universe. 
-                    You have <strong>1 MINUTE</strong> to answer as many space questions as possible. 
-                    Get a question wrong on Easy difficulty and the aliens WIN! 
-                    <br><br>
-                    <span style="color: #4facfe; font-weight: bold;">The fate of Earth is in your hands, Space Defender!</span>
+                    Hostile aliens have arrived! Prove our knowledge of the universe or they win.
+                    You have <strong>1 MINUTE</strong> to answer as many space questions as possible.
+                    Get a question wrong on Easy and the aliens WIN!
+                    <span style="color: #4facfe; font-weight: bold;">The fate of Earth is in your hands!</span>
                 </div>
             </div>
-            <p style="font-size: 1.2em; margin-bottom: 20px;">Choose your difficulty and START THE MISSION!</p>
+            <p style="font-size: 1.1em; margin-bottom: 12px;">Choose your difficulty and START THE MISSION!</p>
             <button class="btn start-btn" onclick="startGame()">🚀 DEFEND EARTH!</button>
         </div>
 
@@ -1753,6 +1751,7 @@
         function startGame() {
             document.getElementById('startScreen').style.display = 'none';
             document.getElementById('gameScreen').style.display = 'flex';
+            document.getElementById('scoreBoard').style.display = '';
             document.querySelector('.container').classList.add('game-active');
             
             // Disable difficulty buttons during gameplay
@@ -1910,6 +1909,7 @@
             // Hide game screen and show start screen
             document.getElementById('gameScreen').style.display = 'none';
             document.getElementById('startScreen').style.display = 'block';
+            document.getElementById('scoreBoard').style.display = 'none';
             document.querySelector('.container').classList.remove('game-active');
             
             // Re-enable difficulty buttons

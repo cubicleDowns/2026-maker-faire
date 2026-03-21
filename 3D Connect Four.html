@@ -391,17 +391,19 @@
             <button class="minimize-btn" onclick="toggleMenu()">✕</button>
             <div class="current-player" id="currentPlayer">Current Player: <span class="player-indicator red"></span> RED</div>
             <div class="winner-message" id="winnerMessage"></div>
-            <div class="game-mode">
-                <button class="mode-btn" id="twoPlayerBtn" onclick="setGameMode(&#39;twoPlayer&#39;)">2 Players</button>
-                <button class="mode-btn active" id="vsAiBtn" onclick="setGameMode(&#39;vsAI&#39;)">vs AI</button>
+            <div id="gameSetup">
+                <div class="game-mode">
+                    <button class="mode-btn" id="twoPlayerBtn" onclick="setGameMode(&#39;twoPlayer&#39;)">2 Players</button>
+                    <button class="mode-btn active" id="vsAiBtn" onclick="setGameMode(&#39;vsAI&#39;)">vs AI</button>
+                </div>
+                <div class="difficulty-selector" id="difficultySelector">
+                    <div style="margin-bottom: 5px; font-weight: bold;">AI Difficulty:</div>
+                    <button class="difficulty-btn active" id="easyBtn" onclick="setDifficulty(&#39;easy&#39;)">Easy</button>
+                    <button class="difficulty-btn" id="mediumBtn" onclick="setDifficulty(&#39;medium&#39;)">Medium</button>
+                    <button class="difficulty-btn" id="hardBtn" onclick="setDifficulty(&#39;hard&#39;)">Hard</button>
+                </div>
+                <button class="reset-btn" onclick="resetGame()">New Game</button>
             </div>
-            <div class="difficulty-selector" id="difficultySelector">
-                <div style="margin-bottom: 5px; font-weight: bold;">AI Difficulty:</div>
-                <button class="difficulty-btn active" id="easyBtn" onclick="setDifficulty(&#39;easy&#39;)">Easy</button>
-                <button class="difficulty-btn" id="mediumBtn" onclick="setDifficulty(&#39;medium&#39;)">Medium</button>
-                <button class="difficulty-btn" id="hardBtn" onclick="setDifficulty(&#39;hard&#39;)">Hard</button>
-            </div>
-            <button class="reset-btn" onclick="resetGame()">New Game</button>
         </div>
     </div>
 
@@ -462,6 +464,13 @@
 
         function toggleInstructions() {
             document.getElementById('instructions').classList.toggle('hidden');
+        }
+
+        function showGameSetup() {
+            document.getElementById('gameSetup').style.display = '';
+            // Ensure the panel is visible (not minimized)
+            document.getElementById('gameInfo').classList.remove('minimized');
+            document.getElementById('expandBtn').classList.remove('visible');
         }
 
         function toggleMenu() {
@@ -1077,9 +1086,10 @@
                 // Check for win
                 if (checkWin(layer, targetRow, col)) {
                     gameOver = true;
-                    document.getElementById('winnerMessage').textContent = 
+                    document.getElementById('winnerMessage').textContent =
                         `🎉 ${currentPlayer.toUpperCase()} WINS! 🎉`;
                     highlightWinningPieces();
+                    showGameSetup();
                     isPaused = false; // Unpause
                     return;
                 }
@@ -1088,6 +1098,7 @@
                 if (isBoardFull()) {
                     gameOver = true;
                     document.getElementById('winnerMessage').textContent = "It's a Draw!";
+                    showGameSetup();
                     isPaused = false; // Unpause
                     return;
                 }
@@ -1636,11 +1647,12 @@
 
         function resetGame() {
             document.getElementById('winnerMessage').textContent = '';
-            
+            document.getElementById('gameSetup').style.display = 'none';
+
             // Remove all piece meshes
             pieces.forEach(mesh => scene.remove(mesh));
             pieces = [];
-            
+
             initBoard();
         }
 
